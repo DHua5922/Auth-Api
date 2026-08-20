@@ -22,6 +22,7 @@ vi.mock("../../utilities/security.ts", () => ({
 const registrationInput = {
 	username: "testuser",
 	email: "testuser@example.com",
+	role: new Types.ObjectId().toHexString(),
 	password: "password123",
 	confirmPassword: "password123",
 };
@@ -99,6 +100,7 @@ test("should hash the password and create a new user", async () => {
 	expect(upsertUserDal).toHaveBeenCalledWith(expect.any(Types.ObjectId), {
 		username: registrationInput.username,
 		email: registrationInput.email,
+		role: registrationInput.role,
 		password: hashedPassword,
 	});
 	expect(populate).toHaveBeenCalledWith("role");

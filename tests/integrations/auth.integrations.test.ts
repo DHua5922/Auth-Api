@@ -1,139 +1,94 @@
-import { Types } from "mongoose";
+import { randomUUID } from "node:crypto";
 import request from "supertest";
-import type { Mock } from "vitest";
 import { SUCCESS_STATUS_CODE } from "../../constants.ts";
 import app from "../../index.ts";
-import { loginService, refreshTokensService } from "../../services/auth.ts";
-import {
-	createNewUserService,
-	deleteUserByIdService,
-	getUserByIdService,
-} from "../../services/user.ts";
-import { jwtToken } from "../../utilities/token.ts";
+import User from "../../models/User.ts";
 
-vi.mock("../../services/auth.ts", () => ({
-	loginService: vi.fn(),
-	refreshTokensService: vi.fn(),
-}));
-
-vi.mock("../../services/user.ts", () => ({
-	createNewUserService: vi.fn(),
-	deleteUserByIdService: vi.fn(),
-	getUserByIdService: vi.fn(),
-}));
-
-const userId = "507f1f77bcf86cd799439011";
-const roleId = new Types.ObjectId("507f1f77bcf86cd799439012");
+const uniqueId = randomUUID();
 const password = "password123";
-const user = {
-	_id: userId,
-	username: "testuser",
-	email: "testuser@example.com",
-	role: {
-		_id: roleId,
-		name: "user",
-		description: "Standard user",
-	},
-	dateCreated: new Date("2026-01-01T00:00:00.000Z"),
-	systemManaged: false,
+const userCredentials = {
+	username: `integration-${uniqueId}`,
+	email: `integration-${uniqueId}@example.com`,
+	role: "",
+	password,
+	confirmPassword: password,
 };
 const expectedUserResponse = {
-	...user,
-	role: roleId.toHexString(),
-	dateCreated: user.dateCreated.toISOString(),
+	_id: expect.any(String),
+	username: userCredentials.username,
+	email: userCredentials.email,
+	role: expect.any(String),
+	dateCreated: expect.any(String),
+	systemManaged: false,
 };
 
-test("POST /register should register a user", async () => {
-	(createNewUserService as Mock).mockResolvedValueOnce(user);
+let userId: string;
+let accessToken: string;
+let refreshToken: string;
 
-	const response = await request(app).post("/api/v1/auth/register").send({
-		username: user.username,
-		email: user.email,
-		password,
-		confirmPassword: password,
-	});
+beforeAll(async () => {
+	const existingUser = await User.findOne({ role: { $exists: true } }).exec();
+	if (!existingUser) {
+		throw new Error("No role is available for the integration test user");
+	}
+
+	userCredentials.role = existingUser.role.toString();
+	const response = await request(app)
+		.post("/api/v1/auth/register")
+		.send(userCredentials);
 
 	expect(response.status).toBe(201);
 	expect(response.body).toEqual(expectedUserResponse);
-	expect(createNewUserService).toHaveBeenCalledWith({
-		username: user.username,
-		email: user.email,
-		password,
-		confirmPassword: password,
-	});
+
+	userId = response.body._id;
 });
 
-test("POST /login should return a user and token pair", async () => {
-	(loginService as Mock).mockResolvedValueOnce({
-		user,
-		accessToken: "accessToken",
-		refreshToken: "refreshToken",
-	});
-
-	const response = await request(app).post("/api/v1/auth/login").send({
-		email: user.email,
-		password,
-	});
-
-	expect(response.status).toBe(SUCCESS_STATUS_CODE);
-	expect(response.body).toEqual({
-		user: expectedUserResponse,
-		accessToken: "accessToken",
-		refreshToken: "refreshToken",
-	});
-	expect(loginService).toHaveBeenCalledWith(user.email, password);
-});
-
-test("POST /secure should return the authenticated user", async () => {
-	const accessToken = jwtToken.create({
-		userId,
-		type: "access",
-		expiresIn: "1m",
-	});
-	(getUserByIdService as Mock).mockResolvedValueOnce(user);
-
-	const response = await request(app)
-		.post("/api/v1/auth/secure")
-		.set("Authorization", `Bearer ${accessToken}`);
-
-	expect(response.status).toBe(SUCCESS_STATUS_CODE);
-	expect(response.body).toEqual(expectedUserResponse);
-	expect(getUserByIdService).toHaveBeenCalledWith(userId);
-});
-
-test("DELETE /close-account/:id should close the account", async () => {
-	const accessToken = jwtToken.create({
-		userId,
-		type: "access",
-		expiresIn: "1m",
-	});
-	(getUserByIdService as Mock).mockResolvedValueOnce(user);
-	(deleteUserByIdService as Mock).mockResolvedValueOnce(user);
-
+afterAll(async () => {
 	const response = await request(app)
 		.delete(`/api/v1/auth/close-account/${userId}`)
 		.set("Authorization", `Bearer ${accessToken}`);
 
 	expect(response.status).toBe(SUCCESS_STATUS_CODE);
 	expect(response.body).toEqual(expectedUserResponse);
-	expect(deleteUserByIdService).toHaveBeenCalledWith(userId);
 });
 
-test("POST /tokens/new should return a new token pair", async () => {
-	const oldRefreshToken = "oldRefreshToken";
-	(refreshTokensService as Mock).mockResolvedValueOnce({
-		accessToken: "newAccessToken",
-		refreshToken: "newRefreshToken",
+test("POST /login should return a user and token pair", async () => {
+	const response = await request(app).post("/api/v1/auth/login").send({
+		email: userCredentials.email,
+		password,
 	});
-
-	const response = await request(app)
-		.post("/api/v1/auth/tokens/new")
-		.send({ refreshToken: oldRefreshToken });
 
 	expect(response.status).toBe(SUCCESS_STATUS_CODE);
 	expect(response.body).toEqual({
-		accessToken: "newAccessToken",
-		refreshToken: "newRefreshToken",
+		user: expectedUserResponse,
+		accessToken: expect.any(String),
+		refreshToken: expect.any(String),
 	});
-	expect(refreshTokensService).toHaveBeenCalledWith(oldRefreshToken);
+
+	accessToken = response.body.accessToken;
+	refreshToken = response.body.refreshToken;
+});
+
+test("POST /secure should return the authenticated user", async () => {
+	const response = await request(app)
+		.post("/api/v1/auth/secure")
+		.set("Authorization", `Bearer ${accessToken}`);
+
+	expect(response.status).toBe(SUCCESS_STATUS_CODE);
+	expect(response.body).toEqual(expectedUserResponse);
+});
+
+test("POST /tokens/new should return a new token pair", async () => {
+	const response = await request(app)
+		.post("/api/v1/auth/tokens/new")
+		.send({ refreshToken });
+
+	expect(response.status).toBe(SUCCESS_STATUS_CODE);
+	expect(response.body).toEqual({
+		accessToken: expect.any(String),
+		refreshToken: expect.any(String),
+	});
+
+	accessToken = response.body.accessToken;
+	refreshToken = response.body.refreshToken;
 });

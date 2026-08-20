@@ -16,31 +16,35 @@ import type { RequestWithUser } from "../types/request.ts";
 
 export async function loginController(req: Request, res: Response) {
 	const { email, password } = loginRequestBodySchema.parse(req.body);
-	res
-		.status(SUCCESS_STATUS_CODE)
-		.json(loginResponseSchema.parse(await loginService(email, password)));
+	const loginData = await loginService(email, password);
+	const responseData = loginResponseSchema.parse(loginData);
+
+	res.status(SUCCESS_STATUS_CODE).json(responseData);
 }
 
 export async function registerNewUserController(req: Request, res: Response) {
 	const registrationInput = registerUserServiceInputSchema.parse(req.body);
 	const user = await createNewUserService(registrationInput);
+	const responseData = userResponseSchema.parse(user);
 
-	res.status(201).json(userResponseSchema.parse(user));
+	res.status(201).json(responseData);
 }
 
 export async function closeAccountController(req: Request, res: Response) {
 	const user = await deleteUserByIdService(`${req.params.id}`);
-	res.status(SUCCESS_STATUS_CODE).json(userResponseSchema.parse(user));
+	const responseData = userResponseSchema.parse(user);
+
+	res.status(SUCCESS_STATUS_CODE).json(responseData);
 }
 
 export async function secureController(req: RequestWithUser, res: Response) {
-	res.status(SUCCESS_STATUS_CODE).json(userResponseSchema.parse(req.user));
+	const responseData = userResponseSchema.parse(req.user);
+	res.status(SUCCESS_STATUS_CODE).json(responseData);
 }
 
 export async function refreshTokensController(req: Request, res: Response) {
 	const newTokens = await refreshTokensService(req.body.refreshToken);
+	const responseData = refreshTokensResponseSchema.parse(newTokens);
 
-	res
-		.status(SUCCESS_STATUS_CODE)
-		.json(refreshTokensResponseSchema.parse(newTokens));
+	res.status(SUCCESS_STATUS_CODE).json(responseData);
 }

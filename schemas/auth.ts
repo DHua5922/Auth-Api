@@ -3,6 +3,7 @@ import {
 	EMPTY_PASSWORD_ERROR_MESSAGE,
 	NO_MATCHING_PASSWORDS_ERROR_MESSAGE,
 } from "../constants.ts";
+import { objectIdStringSchema } from "./mongodb.ts";
 import { userResponseSchema } from "./user.ts";
 
 const tokenSchema = z.string().meta({
@@ -45,6 +46,10 @@ export const registerUserServiceInputSchema = z
 			}),
 		email: z.email({
 			message: "Email is invalid",
+		}),
+		role: objectIdStringSchema.meta({
+			type: "string",
+			description: "The ID of the user's role",
 		}),
 		password: passwordInputSchema.min(1, {
 			message: EMPTY_PASSWORD_ERROR_MESSAGE,
