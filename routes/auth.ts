@@ -134,7 +134,7 @@ route(
 		tags,
 		summary: "Refresh tokens",
 		description:
-			"Refresh the access token and refresh token and set them in http-only cookies. This endpoint uses the refresh token from the http-only cookie to generate new access and refresh tokens.",
+			"Get new access token and refresh token using the given refresh token.",
 		responses: {
 			"200": {
 				content: {

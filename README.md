@@ -1,6 +1,6 @@
-# Global Auth API
+# Auth API
 
-A TypeScript authentication API built with Express, MongoDB, Mongoose, Zod, and JSON Web Tokens. It supports user registration, login, access-token validation, token refresh, and account closure, with generated OpenAPI documentation.
+A TypeScript authentication API built with Express, MongoDB, Mongoose, Zod, and JSON Web Tokens. It supports user registration, login, access token validation, token refresh, and account closure, with generated OpenAPI documentation.
 
 ## Features
 
