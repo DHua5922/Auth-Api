@@ -1,0 +1,46 @@
+name: Integrations
+
+on:
+  schedule:
+    - cron: "0 0 * * *"  # every day at midnight (00:00 UTC)
+
+env:
+  NODE_VERSION: "24.x"
+  PNPM_VERSION: "11.20.0"
+
+jobs:
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout GitHub Action"
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm ${{ env.PNPM_VERSION }}
+        uses: pnpm/action-setup@v6
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node ${{ env.NODE_VERSION }} Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: "Install Dependencies"
+        shell: bash
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+          pnpm install
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Run Integration Tests
+        env:
+          MONGO_URI: ${{ secrets.MONGO_TEST_URI }}
+          JWT_SECRET: ${{ secrets.JWT_TEST_SECRET }}
+          ACCESS_TOKEN_NAME: accessToken
+          ACCESS_TOKEN_EXPIRATION: 15m
+          REFRESH_TOKEN_NAME: refreshToken
+          REFRESH_TOKEN_EXPIRATION: 7d
+        run: pnpm run test:integrations

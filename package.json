@@ -1,0 +1,59 @@
+{
+	"name": "SSO-Users-Admin-Panel-Backend",
+	"version": "1.0.0",
+	"description": "Auth API for SSO Users",
+	"main": "index.ts",
+	"packageManager": "pnpm@11.20.0",
+	"scripts": {
+		"dev": "cross-env NODE_ENV=development nodemon --watch './**/*.ts' --exec node index.ts",
+		"quality:check": "pnpm biome:check && pnpm check:unused && pnpm typescript:check",
+		"biome:check": "biome check .",
+		"biome:fix": "pnpm biome:check --write",
+		"check:unused": "pnpm knip",
+		"typescript:check": "tsc -p tsconfig.json && tsc -p tsconfig.test.json",
+		"test:unit": "vitest run .unit.test.ts --coverage",
+		"test:integrations": "cross-env NODE_ENV=test TEST_TYPE=integration vitest run .integrations.test.ts --coverage"
+	},
+	"keywords": [
+		"express",
+		"mongodb",
+		"typescript",
+		"zod",
+		"openapi"
+	],
+	"author": "Dylan Hua",
+	"license": "ISC",
+	"devEngines": {
+		"packageManager": {
+			"name": "pnpm",
+			"version": "11.20.0",
+			"onFail": "download"
+		}
+	},
+	"type": "module",
+	"dependencies": {
+		"@asteasolutions/zod-to-openapi": "^9.1.0",
+		"bcrypt": "^6.0.0",
+		"dotenv": "^17.4.2",
+		"express": "^5.2.1",
+		"js-ts-kit": "^1.1.0",
+		"jsonwebtoken": "^9.0.3",
+		"mongoose": "^9.9.1",
+		"zod": "^4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.7",
+		"@types/bcrypt": "^6.0.0",
+		"@types/express": "^5.0.6",
+		"@types/jsonwebtoken": "^9.0.10",
+		"@types/node": "^26.1.2",
+		"@types/supertest": "^7.2.1",
+		"@vitest/coverage-v8": "4.1.10",
+		"cross-env": "^10.1.0",
+		"knip": "^6.31.0",
+		"nodemon": "^3.1.14",
+		"supertest": "^7.2.2",
+		"typescript": "^7.0.2",
+		"vitest": "^4.1.10"
+	}
+}
