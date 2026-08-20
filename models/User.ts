@@ -1,5 +1,6 @@
 import { Schema } from "mongoose";
 import mongoose from "../config/database.ts";
+import "./Role.ts";
 
 const User = mongoose.createModel("user", {
 	username: {
