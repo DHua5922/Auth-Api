@@ -30,15 +30,15 @@ pnpm install
 
 Create a `.env` file containing the required environment variables:
 
-| Variable | Purpose | Example |
-| --- | --- | --- |
-| `MONGO_URI` | MongoDB connection string | `mongodb://127.0.0.1:27017/global_auth` |
-| `JWT_SECRET` | Secret used to sign JWTs | A strong random value |
-| `ACCESS_TOKEN_NAME` | Access-token identifier | `accessToken` |
-| `ACCESS_TOKEN_EXPIRATION` | Access-token lifetime | `15m` |
-| `REFRESH_TOKEN_NAME` | Refresh-token identifier | `refreshToken` |
-| `REFRESH_TOKEN_EXPIRATION` | Refresh-token lifetime | `7d` |
-| `PORT` | Optional local server port | `8080` |
+| Variable                   | Purpose                    | Example                                 |
+| -------------------------- | -------------------------- | --------------------------------------- |
+| `MONGO_URI`                | MongoDB connection string  | `mongodb://127.0.0.1:27017/global_auth` |
+| `JWT_SECRET`               | Secret used to sign JWTs   | A strong random value                   |
+| `ACCESS_TOKEN_NAME`        | Access-token identifier    | `accessToken`                           |
+| `ACCESS_TOKEN_EXPIRATION`  | Access-token lifetime      | `15m`                                   |
+| `REFRESH_TOKEN_NAME`       | Refresh-token identifier   | `refreshToken`                          |
+| `REFRESH_TOKEN_EXPIRATION` | Refresh-token lifetime     | `7d`                                    |
+| `PORT`                     | Optional local server port | `8080`                                  |
 
 Start the development server:
 
@@ -50,16 +50,16 @@ The API defaults to `http://localhost:8080`.
 
 ## API endpoints
 
-| Method | Endpoint | Authentication | Description |
-| --- | --- | --- | --- |
-| `POST` | `/api/v1/auth/register` | Public | Register a user |
-| `POST` | `/api/v1/auth/login` | Public | Authenticate and return access and refresh tokens |
-| `POST` | `/api/v1/auth/secure` | Bearer access token | Validate an access token and return its user |
-| `POST` | `/api/v1/auth/tokens/new` | Refresh token in JSON body | Issue a new token pair |
-| `DELETE` | `/api/v1/auth/close-account/:id` | Bearer access token | Delete a non-system-managed user |
-| `GET` | `/openapi.json` | Public | Return the generated OpenAPI document |
-| `GET` | `/docs` | Public | Display Swagger UI |
-| `GET` | `/` | Public | Health response |
+| Method   | Endpoint                         | Authentication             | Description                                       |
+| -------- | -------------------------------- | -------------------------- | ------------------------------------------------- |
+| `POST`   | `/api/v1/auth/register`          | Public                     | Register a user                                   |
+| `POST`   | `/api/v1/auth/login`             | Public                     | Authenticate and return access and refresh tokens |
+| `POST`   | `/api/v1/auth/secure`            | Bearer access token        | Validate an access token and return its user      |
+| `POST`   | `/api/v1/auth/tokens/new`        | Refresh token in JSON body | Issue a new token pair                            |
+| `DELETE` | `/api/v1/auth/close-account/:id` | Bearer access token        | Delete a non-system-managed user                  |
+| `GET`    | `/openapi.json`                  | Public                     | Return the generated OpenAPI document             |
+| `GET`    | `/docs`                          | Public                     | Display Swagger UI                                |
+| `GET`    | `/`                              | Public                     | Health response                                   |
 
 ## API documentation
 
@@ -100,9 +100,11 @@ Test files use suffixes that determine which package script runs them, regardles
 
 `pnpm test:unit` runs every `.unit.test.ts` file. `pnpm test:integrations` sets the integration environment and runs every `.integrations.test.ts` file. Both commands generate V8 coverage reports in `coverage/`.
 
-Integration tests cover successful HTTP scenarios across routing, middleware, controllers, schemas, and token handling. Auth service boundaries are mocked so these tests do not create or delete database users. Unit tests isolate service behavior and cover validation and error scenarios.
+Integration tests cover successful HTTP scenarios across routing, middleware, controllers, schemas, and token handling using the real application stack and the configured MongoDB connection. They should target a dedicated test database from `MONGO_URI` and avoid production data. Unit tests isolate service behavior and cover validation and error scenarios.
 
-The application still initializes its configured MongoDB connection during integration startup. Use a dedicated test database and never point automated tests at production.
+The application initializes its configured MongoDB connection during startup. For automated tests, use a separate test database and never point integration tests at production.
+
+When testing against a deployed Vercel instance, deployment protection can block requests before they reach the app. For local API validation, use the local server at `http://localhost:8080` or disable Vercel protection for the target environment.
 
 ## Deployment
 
