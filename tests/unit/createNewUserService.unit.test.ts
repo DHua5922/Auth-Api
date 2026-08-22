@@ -4,9 +4,16 @@ import {
 	BAD_REQUEST_STATUS_CODE,
 	NO_MATCHING_PASSWORDS_ERROR_MESSAGE,
 } from "../../constants.ts";
+import { getRoleDal } from "../../dal/role.ts";
 import { getUserDal, upsertUserDal } from "../../dal/user.ts";
 import { createNewUserService } from "../../services/user.ts";
 import { bcrypt } from "../../utilities/security.ts";
+
+const roleId = new Types.ObjectId();
+
+vi.mock("../../dal/role.ts", () => ({
+	getRoleDal: vi.fn(),
+}));
 
 vi.mock("../../dal/user.ts", () => ({
 	getUserDal: vi.fn(),
@@ -22,7 +29,6 @@ vi.mock("../../utilities/security.ts", () => ({
 const registrationInput = {
 	username: "testuser",
 	email: "testuser@example.com",
-	role: new Types.ObjectId().toHexString(),
 	password: "password123",
 	confirmPassword: "password123",
 };
@@ -87,6 +93,9 @@ test("should hash the password and create a new user", async () => {
 
 	mockEmailLookup(null);
 	(getUserDal as Mock).mockResolvedValueOnce(null);
+	(getRoleDal as Mock).mockReturnValueOnce({
+		exec: vi.fn().mockResolvedValueOnce({ _id: roleId }),
+	});
 	(bcrypt.hashPassword as Mock).mockResolvedValueOnce(hashedPassword);
 	(upsertUserDal as Mock).mockReturnValue({ populate });
 
@@ -100,7 +109,7 @@ test("should hash the password and create a new user", async () => {
 	expect(upsertUserDal).toHaveBeenCalledWith(expect.any(Types.ObjectId), {
 		username: registrationInput.username,
 		email: registrationInput.email,
-		role: registrationInput.role,
+		role: roleId,
 		password: hashedPassword,
 	});
 	expect(populate).toHaveBeenCalledWith("role");

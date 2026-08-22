@@ -2,14 +2,12 @@ import { randomUUID } from "node:crypto";
 import request from "supertest";
 import { SUCCESS_STATUS_CODE } from "../../constants.ts";
 import app from "../../index.ts";
-import User from "../../models/User.ts";
 
 const uniqueId = randomUUID();
 const password = "password123";
 const userCredentials = {
 	username: `integration-${uniqueId}`,
 	email: `integration-${uniqueId}@example.com`,
-	role: "",
 	password,
 	confirmPassword: password,
 };
@@ -27,12 +25,6 @@ let accessToken: string;
 let refreshToken: string;
 
 beforeAll(async () => {
-	const existingUser = await User.findOne({ role: { $exists: true } }).exec();
-	if (!existingUser) {
-		throw new Error("No role is available for the integration test user");
-	}
-
-	userCredentials.role = existingUser.role.toString();
 	const response = await request(app)
 		.post("/api/v1/auth/register")
 		.send(userCredentials);

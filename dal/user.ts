@@ -1,6 +1,5 @@
 import type { Types } from "mongoose";
 import User from "../models/User.ts";
-import type { RegisterUserServiceInput } from "../schemas/auth.ts";
 
 export function getUserDal(query: Partial<typeof User>) {
 	return User.findOne(query);
@@ -8,7 +7,12 @@ export function getUserDal(query: Partial<typeof User>) {
 
 export function upsertUserDal(
 	_id: Types.ObjectId,
-	userInput: Omit<RegisterUserServiceInput, "confirmPassword">,
+	userInput: {
+		username: string;
+		email: string;
+		role: Types.ObjectId;
+		password: string;
+	},
 ) {
 	return User.findByIdAndUpdate(_id, userInput, {
 		upsert: true,

@@ -2,8 +2,10 @@ import { ApiError } from "js-ts-kit";
 import { Types } from "mongoose";
 import {
 	BAD_REQUEST_STATUS_CODE,
+	INTERNAL_SERVER_ERROR_STATUS_CODE,
 	NO_MATCHING_PASSWORDS_ERROR_MESSAGE,
 } from "../constants.ts";
+import { getRoleDal } from "../dal/role.ts";
 import { deleteUserByIdDal, getUserDal, upsertUserDal } from "../dal/user.ts";
 import type { RegisterUserServiceInput } from "../schemas/auth.ts";
 import { bcrypt } from "../utilities/security.ts";
@@ -46,8 +48,20 @@ export async function createNewUserService(
 		);
 	}
 
+	const DEFAULT_ROLE_NAME = "user";
+	const defaultRole = await getRoleDal({
+		name: DEFAULT_ROLE_NAME,
+	}).exec();
+	if (!defaultRole) {
+		throw new ApiError(
+			`Invariant violated: default role '${DEFAULT_ROLE_NAME}' is missing`,
+			INTERNAL_SERVER_ERROR_STATUS_CODE,
+		);
+	}
+
 	const createdUser = await upsertUserDal(new Types.ObjectId(), {
 		...userInput,
+		role: defaultRole._id,
 		password: await bcrypt.hashPassword(password, 10),
 	})
 		.populate("role")
