@@ -62,5 +62,7 @@ function createTokens(userId: string) {
 			type: "refresh",
 			expiresIn: refreshTokenExpireTime,
 		}),
+		accessTokenExpireTime,
+		refreshTokenExpireTime,
 	};
 }

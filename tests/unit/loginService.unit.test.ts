@@ -92,7 +92,9 @@ test("should return user and token information when login is successful", async 
 			role: userWithoutPassword.role._id.toHexString(),
 		},
 		accessToken: "accessToken",
+		accessTokenExpireTime: process.env.ACCESS_TOKEN_EXPIRATION || "15m",
 		refreshToken: "refreshToken",
+		refreshTokenExpireTime: process.env.REFRESH_TOKEN_EXPIRATION || "7d",
 	};
 
 	expect(value).toEqual(expectedResult);
