@@ -55,6 +55,8 @@ test("POST /login should return a user and token pair", async () => {
 		user: expectedUserResponse,
 		accessToken: expect.any(String),
 		refreshToken: expect.any(String),
+		accessTokenExpireTime: expect.any(String),
+		refreshTokenExpireTime: expect.any(String),
 	});
 
 	accessToken = response.body.accessToken;
