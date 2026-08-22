@@ -30,6 +30,14 @@ export const loginResponseSchema = z.object({
 	user: userResponseSchema,
 	accessToken: tokenSchema,
 	refreshToken: tokenSchema,
+	accessTokenExpireTime: z.string().meta({
+		type: "string",
+		example: "15m",
+	}),
+	refreshTokenExpireTime: z.string().meta({
+		type: "string",
+		example: "7d",
+	}),
 });
 
 export const registerUserServiceInputSchema = z
