@@ -1,10 +1,12 @@
 import { z } from "zod";
 import {
 	closeAccountController,
+	getAccessTokenByEmailController,
+	getMeController,
 	loginController,
 	refreshTokensController,
 	registerNewUserController,
-	secureController,
+	resetPasswordController,
 } from "../controllers/auth.ts";
 import { secureMiddleware } from "../middleware/auth.ts";
 import {
@@ -12,10 +14,13 @@ import {
 	loggingMiddleware,
 } from "../middleware/logging.ts";
 import {
+	accessTokenByEmailRequestBodySchema,
+	accessTokenByEmailResponseSchema,
 	loginRequestBodySchema,
 	loginResponseSchema,
 	refreshTokensResponseSchema,
 	registerUserServiceInputSchema,
+	resetPasswordServiceInputSchema,
 } from "../schemas/auth.ts";
 import { objectIdStringSchema } from "../schemas/mongodb.ts";
 import { userResponseSchema } from "../schemas/user.ts";
@@ -100,17 +105,47 @@ route(
 
 route(
 	{
-		path: "/secure",
+		path: "/access-token-by-email",
 		method: "post",
 		tags,
-		summary: "Validate JWT token",
-		description:
-			"This endpoint will check if the user is registered in the database. If so, it will return the user information. The password is not included in the response.",
+		summary: "Get access token by email",
+		description: "Return an access token for the provided email address.",
+		request: {
+			body: {
+				content: {
+					"application/json": {
+						schema: accessTokenByEmailRequestBodySchema,
+					},
+				},
+				required: true,
+			},
+		},
+		responses: {
+			"200": {
+				content: {
+					"application/json": {
+						schema: accessTokenByEmailResponseSchema,
+					},
+				},
+			},
+		},
+	},
+	loggingMiddleware,
+	errorLoggingMiddleware(getAccessTokenByEmailController),
+);
+
+route(
+	{
+		path: "/me",
+		method: "get",
+		tags,
+		summary: "Get current user",
+		description: "Return the authenticated user from the bearer access token.",
 		responses: userResponseConfig,
 	},
 	loggingMiddleware,
 	errorLoggingMiddleware(secureMiddleware),
-	errorLoggingMiddleware(secureController),
+	errorLoggingMiddleware(getMeController),
 );
 
 route(
@@ -133,6 +168,31 @@ route(
 	loggingMiddleware,
 	errorLoggingMiddleware(secureMiddleware),
 	errorLoggingMiddleware(closeAccountController),
+);
+
+route(
+	{
+		path: "/reset-password",
+		method: "post",
+		tags,
+		summary: "Reset password",
+		description:
+			"Reset the authenticated user's password using password and confirm password.",
+		request: {
+			body: {
+				content: {
+					"application/json": {
+						schema: resetPasswordServiceInputSchema,
+					},
+				},
+				required: true,
+			},
+		},
+		responses: userResponseConfig,
+	},
+	loggingMiddleware,
+	errorLoggingMiddleware(secureMiddleware),
+	errorLoggingMiddleware(resetPasswordController),
 );
 
 route(

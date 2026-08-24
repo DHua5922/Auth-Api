@@ -36,12 +36,24 @@ export const loginRequestBodySchema = z.object({
 	}),
 });
 
+export const accessTokenByEmailRequestBodySchema = z.object({
+	email: z.email().meta({
+		type: "string",
+		example: "user@example.com",
+	}),
+});
+
 export const loginResponseSchema = z.object({
 	user: userResponseSchema,
 	accessToken: tokenSchema,
 	refreshToken: tokenSchema,
 	accessTokenExpireTime: accessTokenExpireTimeSchema,
 	refreshTokenExpireTime: refreshTokenExpireTimeSchema,
+});
+
+export const accessTokenByEmailResponseSchema = z.object({
+	accessToken: tokenSchema,
+	accessTokenExpireTime: accessTokenExpireTimeSchema,
 });
 
 export const registerUserServiceInputSchema = z
@@ -82,6 +94,34 @@ export const registerUserServiceInputSchema = z
 	});
 export type RegisterUserServiceInput = z.infer<
 	typeof registerUserServiceInputSchema
+>;
+
+export const resetPasswordServiceInputSchema = z
+	.object({
+		password: passwordInputSchema.min(1, {
+			message: EMPTY_PASSWORD_ERROR_MESSAGE,
+		}),
+		confirmPassword: passwordInputSchema,
+	})
+	.superRefine((data, ctx) => {
+		if (data.password !== data.confirmPassword) {
+			ctx.addIssue({
+				code: "custom",
+				message: NO_MATCHING_PASSWORDS_ERROR_MESSAGE,
+				path: ["confirmPassword"],
+			});
+		}
+
+		if (!data.password.trim()) {
+			ctx.addIssue({
+				code: "custom",
+				message: EMPTY_PASSWORD_ERROR_MESSAGE,
+				path: ["password"],
+			});
+		}
+	});
+export type ResetPasswordServiceInput = z.infer<
+	typeof resetPasswordServiceInputSchema
 >;
 
 export const refreshTokensResponseSchema = z.object({

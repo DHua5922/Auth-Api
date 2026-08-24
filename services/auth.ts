@@ -43,6 +43,24 @@ export async function registerService(
 	return createAuthResponse(user);
 }
 
+export async function getUserAccessTokenByEmailService(email: string) {
+	const user = await getUserByEmailService(email);
+	if (!user) {
+		throw new ApiError("User not found", 404);
+	}
+
+	const accessTokenExpireTime = process.env.ACCESS_TOKEN_EXPIRATION || "15m";
+
+	return {
+		accessToken: jwtToken.create({
+			userId: user._id,
+			type: "access",
+			expiresIn: accessTokenExpireTime,
+		}),
+		accessTokenExpireTime,
+	};
+}
+
 export async function refreshTokensService(refreshToken: string) {
 	requireToken(refreshToken);
 
