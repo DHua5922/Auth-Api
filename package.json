@@ -6,9 +6,9 @@
 	"packageManager": "pnpm@11.20.0",
 	"scripts": {
 		"dev": "cross-env NODE_ENV=development nodemon --watch './**/*.ts' --exec node index.ts",
-		"quality:check": "pnpm biome:check && pnpm check:unused && pnpm typescript:check",
-		"biome:check": "biome check .",
-		"biome:fix": "pnpm biome:check --write",
+		"quality:check": "pnpm lint && pnpm check:unused && pnpm typescript:check",
+		"lint": "biome check .",
+		"format": "pnpm lint --write",
 		"check:unused": "pnpm knip",
 		"typescript:check": "tsc -p tsconfig.json && tsc -p tsconfig.test.json",
 		"test:unit": "vitest run .unit.test.ts --coverage",
