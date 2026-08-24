@@ -30,9 +30,17 @@ beforeAll(async () => {
 		.send(userCredentials);
 
 	expect(response.status).toBe(201);
-	expect(response.body).toEqual(expectedUserResponse);
+	expect(response.body).toEqual({
+		user: expectedUserResponse,
+		accessToken: expect.any(String),
+		refreshToken: expect.any(String),
+		accessTokenExpireTime: expect.any(String),
+		refreshTokenExpireTime: expect.any(String),
+	});
 
-	userId = response.body._id;
+	userId = response.body.user._id;
+	accessToken = response.body.accessToken;
+	refreshToken = response.body.refreshToken;
 });
 
 afterAll(async () => {
@@ -81,6 +89,8 @@ test("POST /tokens/new should return a new token pair", async () => {
 	expect(response.body).toEqual({
 		accessToken: expect.any(String),
 		refreshToken: expect.any(String),
+		accessTokenExpireTime: expect.any(String),
+		refreshTokenExpireTime: expect.any(String),
 	});
 
 	accessToken = response.body.accessToken;

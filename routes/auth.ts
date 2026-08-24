@@ -73,7 +73,7 @@ route(
 		tags,
 		summary: "Register user",
 		description:
-			"Register a new user and returns user information. The password is not included in the response.",
+			"Register a new user and return user information with access and refresh tokens.",
 		request: {
 			body: {
 				content: {
@@ -84,7 +84,15 @@ route(
 				required: true,
 			},
 		},
-		responses: userResponseConfig,
+		responses: {
+			"201": {
+				content: {
+					"application/json": {
+						schema: loginResponseSchema,
+					},
+				},
+			},
+		},
 	},
 	loggingMiddleware,
 	errorLoggingMiddleware(registerNewUserController),

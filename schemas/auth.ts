@@ -16,6 +16,15 @@ const passwordInputSchema = z.string().meta({
 	example: "password123",
 });
 
+const accessTokenExpireTimeSchema = z.string().meta({
+	type: "string",
+	example: "15m",
+});
+const refreshTokenExpireTimeSchema = z.string().meta({
+	type: "string",
+	example: "7d",
+});
+
 export const loginRequestBodySchema = z.object({
 	email: z.email().meta({
 		type: "string",
@@ -26,18 +35,13 @@ export const loginRequestBodySchema = z.object({
 		example: "password123",
 	}),
 });
+
 export const loginResponseSchema = z.object({
 	user: userResponseSchema,
 	accessToken: tokenSchema,
 	refreshToken: tokenSchema,
-	accessTokenExpireTime: z.string().meta({
-		type: "string",
-		example: "15m",
-	}),
-	refreshTokenExpireTime: z.string().meta({
-		type: "string",
-		example: "7d",
-	}),
+	accessTokenExpireTime: accessTokenExpireTimeSchema,
+	refreshTokenExpireTime: refreshTokenExpireTimeSchema,
 });
 
 export const registerUserServiceInputSchema = z
@@ -83,4 +87,6 @@ export type RegisterUserServiceInput = z.infer<
 export const refreshTokensResponseSchema = z.object({
 	accessToken: tokenSchema,
 	refreshToken: tokenSchema,
+	accessTokenExpireTime: accessTokenExpireTimeSchema,
+	refreshTokenExpireTime: refreshTokenExpireTimeSchema,
 });

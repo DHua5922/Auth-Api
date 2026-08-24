@@ -3,6 +3,7 @@ import {
 	BAD_REQUEST_STATUS_CODE,
 	INVALID_LOGIN_CREDENTIALS_ERROR_MESSAGE,
 } from "../constants.ts";
+import type { RegisterUserServiceInput } from "../schemas/auth.ts";
 import { userResponseSchema } from "../schemas/user.ts";
 import { bcrypt } from "../utilities/security.ts";
 import {
@@ -10,7 +11,7 @@ import {
 	requireRefreshTokenType,
 	requireToken,
 } from "../utilities/token.ts";
-import { getUserByEmailService } from "./user.ts";
+import { createNewUserService, getUserByEmailService } from "./user.ts";
 
 export async function loginService(email: string, passwordInput: string) {
 	const user = await getUserByEmailService(email);
@@ -32,10 +33,14 @@ export async function loginService(email: string, passwordInput: string) {
 		);
 	}
 
-	return {
-		user: userResponseSchema.parse(user),
-		...createTokens(user._id),
-	};
+	return createAuthResponse(user);
+}
+
+export async function registerService(
+	registrationInput: RegisterUserServiceInput,
+) {
+	const user = await createNewUserService(registrationInput);
+	return createAuthResponse(user);
 }
 
 export async function refreshTokensService(refreshToken: string) {
@@ -64,5 +69,12 @@ function createTokens(userId: string) {
 		}),
 		accessTokenExpireTime,
 		refreshTokenExpireTime,
+	};
+}
+
+function createAuthResponse(user: { _id: string }) {
+	return {
+		user: userResponseSchema.parse(user),
+		...createTokens(user._id),
 	};
 }

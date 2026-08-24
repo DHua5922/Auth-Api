@@ -7,11 +7,12 @@ import {
 	registerUserServiceInputSchema,
 } from "../schemas/auth.ts";
 import { userResponseSchema } from "../schemas/user.ts";
-import { loginService, refreshTokensService } from "../services/auth.ts";
 import {
-	createNewUserService,
-	deleteUserByIdService,
-} from "../services/user.ts";
+	loginService,
+	refreshTokensService,
+	registerService,
+} from "../services/auth.ts";
+import { deleteUserByIdService } from "../services/user.ts";
 import type { RequestWithUser } from "../types/request.ts";
 
 export async function loginController(req: Request, res: Response) {
@@ -24,8 +25,8 @@ export async function loginController(req: Request, res: Response) {
 
 export async function registerNewUserController(req: Request, res: Response) {
 	const registrationInput = registerUserServiceInputSchema.parse(req.body);
-	const user = await createNewUserService(registrationInput);
-	const responseData = userResponseSchema.parse(user);
+	const registrationData = await registerService(registrationInput);
+	const responseData = loginResponseSchema.parse(registrationData);
 
 	res.status(201).json(responseData);
 }
