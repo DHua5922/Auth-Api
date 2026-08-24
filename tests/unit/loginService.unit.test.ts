@@ -4,12 +4,16 @@ import {
 	BAD_REQUEST_STATUS_CODE,
 	INVALID_LOGIN_CREDENTIALS_ERROR_MESSAGE,
 } from "../../constants.ts";
-import { loginService } from "../../services/auth.ts";
-import { getUserByEmailService } from "../../services/user.ts";
+import { loginService, registerService } from "../../services/auth.ts";
+import {
+	createNewUserService,
+	getUserByEmailService,
+} from "../../services/user.ts";
 import { bcrypt } from "../../utilities/security.ts";
 import { jwtToken } from "../../utilities/token.ts";
 
 vi.mock("../../services/user.ts", () => ({
+	createNewUserService: vi.fn(),
 	getUserByEmailService: vi.fn(),
 }));
 
@@ -98,4 +102,39 @@ test("should return user and token information when login is successful", async 
 	};
 
 	expect(value).toEqual(expectedResult);
+});
+
+test("should return user and token information when registration is successful", async () => {
+	const createNewUserServiceMock = createNewUserService as Mock;
+	const createJwtTokenMock = jwtToken.create as Mock;
+
+	createNewUserServiceMock.mockResolvedValueOnce(testUser);
+	createJwtTokenMock
+		.mockReturnValueOnce("accessToken")
+		.mockReturnValueOnce("refreshToken");
+
+	const value = await registerService({
+		username: testUser.username,
+		email: testUser.email,
+		password: "correctPassword",
+		confirmPassword: "correctPassword",
+	});
+	const { password, ...userWithoutPassword } = testUser;
+
+	expect(value).toEqual({
+		user: {
+			...userWithoutPassword,
+			role: userWithoutPassword.role._id.toHexString(),
+		},
+		accessToken: "accessToken",
+		accessTokenExpireTime: process.env.ACCESS_TOKEN_EXPIRATION || "15m",
+		refreshToken: "refreshToken",
+		refreshTokenExpireTime: process.env.REFRESH_TOKEN_EXPIRATION || "7d",
+	});
+	expect(createNewUserServiceMock).toHaveBeenCalledWith({
+		username: testUser.username,
+		email: testUser.email,
+		password: "correctPassword",
+		confirmPassword: "correctPassword",
+	});
 });
