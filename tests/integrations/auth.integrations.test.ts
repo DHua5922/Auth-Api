@@ -23,6 +23,7 @@ const expectedUserResponse = {
 let userId: string;
 let accessToken: string;
 let refreshToken: string;
+const newPassword = "newPassword123";
 
 beforeAll(async () => {
 	const response = await request(app)
@@ -71,13 +72,57 @@ test("POST /login should return a user and token pair", async () => {
 	refreshToken = response.body.refreshToken;
 });
 
-test("POST /secure should return the authenticated user", async () => {
+test("GET /me should return the authenticated user", async () => {
 	const response = await request(app)
-		.post("/api/v1/auth/secure")
+		.get("/api/v1/auth/me")
 		.set("Authorization", `Bearer ${accessToken}`);
 
 	expect(response.status).toBe(SUCCESS_STATUS_CODE);
 	expect(response.body).toEqual(expectedUserResponse);
+});
+
+test("POST /access-token-by-email should return an access token", async () => {
+	const response = await request(app)
+		.post("/api/v1/auth/access-token-by-email")
+		.send({ email: userCredentials.email });
+
+	expect(response.status).toBe(SUCCESS_STATUS_CODE);
+	expect(response.body).toEqual({
+		accessToken: expect.any(String),
+		accessTokenExpireTime: expect.any(String),
+	});
+});
+
+test("POST /reset-password should update password for authenticated user", async () => {
+	const response = await request(app)
+		.post("/api/v1/auth/reset-password")
+		.set("Authorization", `Bearer ${accessToken}`)
+		.send({
+			password: newPassword,
+			confirmPassword: newPassword,
+		});
+
+	expect(response.status).toBe(SUCCESS_STATUS_CODE);
+	expect(response.body).toEqual(expectedUserResponse);
+});
+
+test("POST /login should allow using the new password after reset", async () => {
+	const response = await request(app).post("/api/v1/auth/login").send({
+		email: userCredentials.email,
+		password: newPassword,
+	});
+
+	expect(response.status).toBe(SUCCESS_STATUS_CODE);
+	expect(response.body).toEqual({
+		user: expectedUserResponse,
+		accessToken: expect.any(String),
+		refreshToken: expect.any(String),
+		accessTokenExpireTime: expect.any(String),
+		refreshTokenExpireTime: expect.any(String),
+	});
+
+	accessToken = response.body.accessToken;
+	refreshToken = response.body.refreshToken;
 });
 
 test("POST /tokens/new should return a new token pair", async () => {

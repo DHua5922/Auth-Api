@@ -27,3 +27,13 @@ export function deleteUserByIdDal(id: string) {
 		systemManaged: { $ne: true },
 	});
 }
+
+export function updateUserPasswordByIdDal(id: string, password: string) {
+	return User.findByIdAndUpdate(
+		id,
+		{ password },
+		{
+			new: true,
+		},
+	);
+}
