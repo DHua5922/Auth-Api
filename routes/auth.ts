@@ -13,6 +13,7 @@ import {
 	errorLoggingMiddleware,
 	loggingMiddleware,
 } from "../middleware/logging.ts";
+import { validateRequestBodyMiddleware } from "../middleware/validation.ts";
 import {
 	accessTokenByEmailRequestBodySchema,
 	accessTokenByEmailResponseSchema,
@@ -38,6 +39,14 @@ const userResponseConfig = {
 		},
 	},
 };
+
+const refreshTokensRequestBodySchema = z.object({
+	refreshToken: z.string().meta({
+		type: "string",
+		example:
+			"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2M2Y0YjQ3ZDYyYjA0ZDAwMTQxYzE4ZjkiLCJ0eXBlIjoicmVmcmVzaCIsImV4cGlyZWRJbiI6IjdkIiwiaWF0IjoxNjg4NzQ3OTk5fQ.8n7v8lW8lW8lW8lW8lW8lW8lW8lW8lW8lW8lW8lW8lW8lW8lW8lW8lW8lW8lW8",
+	}),
+});
 
 route(
 	{
@@ -68,6 +77,7 @@ route(
 		},
 	},
 	loggingMiddleware,
+	errorLoggingMiddleware(validateRequestBodyMiddleware(loginRequestBodySchema)),
 	errorLoggingMiddleware(loginController),
 );
 
@@ -100,6 +110,9 @@ route(
 		},
 	},
 	loggingMiddleware,
+	errorLoggingMiddleware(
+		validateRequestBodyMiddleware(registerUserServiceInputSchema),
+	),
 	errorLoggingMiddleware(registerNewUserController),
 );
 
@@ -131,6 +144,9 @@ route(
 		},
 	},
 	loggingMiddleware,
+	errorLoggingMiddleware(
+		validateRequestBodyMiddleware(accessTokenByEmailRequestBodySchema),
+	),
 	errorLoggingMiddleware(getAccessTokenByEmailController),
 );
 
@@ -192,6 +208,9 @@ route(
 	},
 	loggingMiddleware,
 	errorLoggingMiddleware(secureMiddleware),
+	errorLoggingMiddleware(
+		validateRequestBodyMiddleware(resetPasswordServiceInputSchema),
+	),
 	errorLoggingMiddleware(resetPasswordController),
 );
 
@@ -214,6 +233,9 @@ route(
 		},
 	},
 	loggingMiddleware,
+	errorLoggingMiddleware(
+		validateRequestBodyMiddleware(refreshTokensRequestBodySchema),
+	),
 	errorLoggingMiddleware(refreshTokensController),
 );
 
