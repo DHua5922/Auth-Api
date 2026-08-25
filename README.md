@@ -1,18 +1,18 @@
 # Auth API
 
-A TypeScript authentication API built with Express, MongoDB, Mongoose, Zod, and JSON Web Tokens. It supports user registration, login, authenticated user lookup, access-token lookup by email, password reset, token refresh, and account closure, with generated OpenAPI documentation.
+A TypeScript authentication API built with Express, MongoDB, Mongoose, Zod, and JSON Web Tokens. It supports user registration, login, authenticated user lookup, access-token lookup by email, password reset, token refresh, profile updates, account closure, and event publishing to Inngest, with generated OpenAPI documentation.
 
 ## Table of contents
 
 - [Features](#features)
 - [Requirements](#requirements)
 - [Setup](#setup)
-- [API endpoints](#api-endpoints)
-- [API documentation](#api-documentation)
+- [API Endpoints](#api-endpoints)
+- [API Documentation](#api-documentation)
 - [Architecture](#architecture)
-- [Quality and automated testing](#quality-and-automated-testing)
+- [Quality and Automated Testing](#quality-and-automated-testing)
 - [Deployment](#deployment)
-- [Security considerations](#security-considerations)
+- [Security Considerations](#security-considerations)
 - [License](#license)
 
 ## Features
@@ -26,12 +26,14 @@ A TypeScript authentication API built with Express, MongoDB, Mongoose, Zod, and 
 - Request IDs included in responses and logs
 - Unit and HTTP integration tests with Vitest and Supertest
 - V8 test coverage
+- Inngest event emission for user deletion notifications
 
 ## Requirements
 
 - Node.js 24
 - pnpm 11.20.0
 - MongoDB
+- Optional local Inngest dev server for development event processing
 
 ## Setup
 
@@ -43,15 +45,18 @@ pnpm install
 
 Create a `.env` file containing the required environment variables:
 
-| Variable                   | Purpose                    | Example                                 |
-| -------------------------- | -------------------------- | --------------------------------------- |
-| `MONGO_URI`                | MongoDB connection string  | `mongodb://127.0.0.1:27017/global_auth` |
-| `JWT_SECRET`               | Secret used to sign JWTs   | A strong random value                   |
-| `ACCESS_TOKEN_NAME`        | Access-token identifier    | `accessToken`                           |
-| `ACCESS_TOKEN_EXPIRATION`  | Access-token lifetime      | `15m`                                   |
-| `REFRESH_TOKEN_NAME`       | Refresh-token identifier   | `refreshToken`                          |
-| `REFRESH_TOKEN_EXPIRATION` | Refresh-token lifetime     | `7d`                                    |
-| `PORT`                     | Optional local server port | `8080`                                  |
+| Variable                   | Purpose                                | Example                                 |
+| -------------------------- | -------------------------------------- | --------------------------------------- |
+| `MONGO_URI`                | MongoDB connection string              | `mongodb://127.0.0.1:27017/global_auth` |
+| `JWT_SECRET`               | Secret used to sign JWTs               | A strong random value                   |
+| `ACCESS_TOKEN_NAME`        | Access-token identifier                | `accessToken`                           |
+| `ACCESS_TOKEN_EXPIRATION`  | Access-token lifetime                  | `15m`                                   |
+| `REFRESH_TOKEN_NAME`       | Refresh-token identifier               | `refreshToken`                          |
+| `REFRESH_TOKEN_EXPIRATION` | Refresh-token lifetime                 | `7d`                                    |
+| `NODE_ENV`                 | Runtime environment                    | `development`, `test`, or `production`  |
+| `PORT`                     | Optional local server port             | `8080`                                  |
+| `INNGEST_EVENT_KEY`        | Inngest signing key for event emission | A valid Inngest event key               |
+| `INNGEST_BASE_URL`         | Local Inngest dev server URL           | `http://127.0.0.1:8288`                 |
 
 Start the development server:
 
@@ -60,6 +65,8 @@ pnpm dev
 ```
 
 The API defaults to `http://localhost:8080`.
+
+For local Inngest development, start the Inngest dev server and keep `INNGEST_BASE_URL=http://127.0.0.1:8288` unless you are using a different local port.
 
 ## API endpoints
 
