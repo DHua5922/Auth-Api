@@ -7,6 +7,13 @@ on:
 env:
   NODE_VERSION: "24.x"
   PNPM_VERSION: "11.20.0"
+  MONGO_URI: ${{ secrets.MONGO_TEST_URI }}
+  JWT_SECRET: ${{ secrets.JWT_TEST_SECRET }}
+  INNGEST_EVENT_KEY: ${{ secrets.INNGEST_EVENT_KEY }}
+  ACCESS_TOKEN_NAME: "accessToken"
+  ACCESS_TOKEN_EXPIRATION: "10m"
+  REFRESH_TOKEN_NAM: "refreshToken"
+  REFRESH_TOKEN_EXPIRATION: "1d"
 
 jobs:
   integration:

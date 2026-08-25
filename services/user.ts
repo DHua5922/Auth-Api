@@ -1,3 +1,4 @@
+import { Inngest } from "inngest";
 import { ApiError } from "js-ts-kit";
 import { Types } from "mongoose";
 import {
@@ -20,6 +21,10 @@ import type {
 } from "../schemas/auth.ts";
 import type { UpdateUserProfileInput } from "../schemas/user.ts";
 import { bcrypt } from "../utilities/security.ts";
+
+const inngest = new Inngest({
+	id: "finance-tracker",
+});
 
 export async function getUserByIdService(_id: string) {
 	return getUserDal({ _id }).populate("role").exec();
@@ -88,6 +93,13 @@ export async function deleteUserByIdService(_id: string) {
 	}
 
 	const deletedUser = await deleteUserByIdDal(_id).populate("role").exec();
+
+	// Send user object ID to Inngest
+	await inngest.send({
+		name: "app/user.deleted",
+		data: { userId: deletedUser._id },
+	});
+
 	return deletedUser;
 }
 
