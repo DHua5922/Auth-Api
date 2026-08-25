@@ -6,6 +6,7 @@ import { requestIdMiddleware } from "./middleware/requestId.ts";
 import authRouter from "./routes/auth.ts";
 import docsRouter from "./routes/docs.ts";
 import homeRouter from "./routes/home.ts";
+import userRouter from "./routes/user.ts";
 
 checkEnvVariables();
 mongoose.connectToMongoDb();
@@ -50,5 +51,6 @@ function configureApp(app: Express) {
 	app.use(express.json());
 	app.use(homeRouter);
 	app.use(authRouter);
+	app.use(userRouter);
 	app.use(docsRouter);
 }
