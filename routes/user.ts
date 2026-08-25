@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { updateUserProfileController } from "../controllers/user.ts";
+import {
+	closeAccountController,
+	getMeController,
+	updateUserProfileController,
+} from "../controllers/user.ts";
 import { secureMiddleware } from "../middleware/auth.ts";
 import {
 	errorLoggingMiddleware,
@@ -16,6 +20,51 @@ import { createDocumentedRoute } from "../utilities/docs.ts";
 const { router, route } = createDocumentedRoute("/api/v1/users");
 
 const tags = ["Users"];
+const userResponseConfig = {
+	"200": {
+		content: {
+			"application/json": {
+				schema: userResponseSchema,
+			},
+		},
+	},
+};
+
+route(
+	{
+		path: "/me",
+		method: "get",
+		tags,
+		summary: "Get current user",
+		description: "Return the authenticated user from the bearer access token.",
+		responses: userResponseConfig,
+	},
+	loggingMiddleware,
+	errorLoggingMiddleware(secureMiddleware),
+	errorLoggingMiddleware(getMeController),
+);
+
+route(
+	{
+		path: "/{id}",
+		method: "delete",
+		tags,
+		summary: "Close user account",
+		description:
+			"Deletes the user account and returns user information. The password is not included in the response.",
+		request: {
+			params: z.object({
+				id: objectIdStringSchema.meta({
+					description: "The ID of the user to delete",
+				}),
+			}),
+		},
+		responses: userResponseConfig,
+	},
+	loggingMiddleware,
+	errorLoggingMiddleware(secureMiddleware),
+	errorLoggingMiddleware(closeAccountController),
+);
 
 route(
 	{

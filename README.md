@@ -68,11 +68,11 @@ The API defaults to `http://localhost:8080`.
 | `POST`   | `/api/v1/auth/register`              | Public                     | Register a user                                   |
 | `POST`   | `/api/v1/auth/login`                 | Public                     | Authenticate and return access and refresh tokens |
 | `POST`   | `/api/v1/auth/access-token-by-email` | Public                     | Return an access token for the provided email     |
-| `GET`    | `/api/v1/auth/me`                    | Bearer access token        | Return the authenticated user                     |
+| `GET`    | `/api/v1/users/me`                   | Bearer access token        | Return the authenticated user                     |
 | `POST`   | `/api/v1/auth/reset-password`        | Bearer access token        | Reset the authenticated user's password           |
 | `POST`   | `/api/v1/auth/tokens/new`            | Refresh token in JSON body | Issue a new token pair                            |
 | `PUT`    | `/api/v1/users/{id}`                 | Bearer access token        | Update a user's username and email                |
-| `DELETE` | `/api/v1/auth/close-account/:id`     | Bearer access token        | Delete a non-system-managed user                  |
+| `DELETE` | `/api/v1/users/:id`                  | Bearer access token        | Delete a non-system-managed user                  |
 | `GET`    | `/openapi.json`                      | Public                     | Return the generated OpenAPI document             |
 | `GET`    | `/docs`                              | Public                     | Display Swagger UI                                |
 | `GET`    | `/`                                  | Public                     | Health response                                   |

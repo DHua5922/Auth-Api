@@ -12,10 +12,7 @@ import {
 	refreshTokensService,
 	registerService,
 } from "../services/auth.ts";
-import {
-	deleteUserByIdService,
-	resetUserPasswordService,
-} from "../services/user.ts";
+import { resetUserPasswordService } from "../services/user.ts";
 import type { RequestWithUser } from "../types/request.ts";
 
 export async function loginController(req: Request, res: Response) {
@@ -34,18 +31,6 @@ export async function registerNewUserController(req: Request, res: Response) {
 	const responseData = loginResponseSchema.parse(registrationData);
 
 	res.status(201).json(responseData);
-}
-
-export async function closeAccountController(req: Request, res: Response) {
-	const user = await deleteUserByIdService(`${req.params.id}`);
-	const responseData = userResponseSchema.parse(user);
-
-	res.status(SUCCESS_STATUS_CODE).json(responseData);
-}
-
-export async function getMeController(req: RequestWithUser, res: Response) {
-	const responseData = userResponseSchema.parse(req.user);
-	res.status(SUCCESS_STATUS_CODE).json(responseData);
 }
 
 export async function getAccessTokenByEmailController(

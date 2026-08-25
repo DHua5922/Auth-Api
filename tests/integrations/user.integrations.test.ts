@@ -27,7 +27,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
 	const response = await request(app)
-		.delete(`/api/v1/auth/close-account/${userId}`)
+		.delete(`/api/v1/users/${userId}`)
 		.set("Authorization", `Bearer ${accessToken}`);
 
 	expect(response.status).toBe(SUCCESS_STATUS_CODE);
