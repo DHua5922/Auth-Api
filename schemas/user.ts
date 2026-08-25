@@ -27,6 +27,25 @@ export const userResponseSchema = z.object({
 	systemManaged: z.boolean().optional(),
 });
 
+export const updateUserProfileRequestBodySchema = z.object({
+	username: z
+		.string()
+		.min(1, {
+			message: "Username cannot be empty",
+		})
+		.meta({
+			type: "string",
+			example: "john_doe",
+		}),
+	email: z.email({
+		message: "Email is invalid",
+	}),
+});
+
+export type UpdateUserProfileInput = z.infer<
+	typeof updateUserProfileRequestBodySchema
+>;
+
 function hasToHexString(
 	value: unknown,
 ): value is { toHexString: () => string } {

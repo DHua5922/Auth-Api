@@ -11,12 +11,14 @@ import {
 	deleteUserByIdDal,
 	getUserDal,
 	updateUserPasswordByIdDal,
+	updateUserProfileByIdDal,
 	upsertUserDal,
 } from "../dal/user.ts";
 import type {
 	RegisterUserServiceInput,
 	ResetPasswordServiceInput,
 } from "../schemas/auth.ts";
+import type { UpdateUserProfileInput } from "../schemas/user.ts";
 import { bcrypt } from "../utilities/security.ts";
 
 export async function getUserByIdService(_id: string) {
@@ -116,4 +118,36 @@ export async function resetUserPasswordService(
 	}
 
 	return updatedUser;
+}
+
+export async function updateUserProfileByIdService(
+	userId: string,
+	updateUserProfileInput: UpdateUserProfileInput,
+) {
+	const existingUserWithEmail = await getUserDal({
+		email: updateUserProfileInput.email,
+	}).exec();
+	if (existingUserWithEmail && `${existingUserWithEmail._id}` !== userId) {
+		throw new ApiError(
+			`User with email ${updateUserProfileInput.email} already exists`,
+			BAD_REQUEST_STATUS_CODE,
+		);
+	}
+
+	const existingUserWithUsername = await getUserDal({
+		username: updateUserProfileInput.username,
+	}).exec();
+	if (
+		existingUserWithUsername &&
+		`${existingUserWithUsername._id}` !== userId
+	) {
+		throw new ApiError(
+			`User with username ${updateUserProfileInput.username} already exists`,
+			BAD_REQUEST_STATUS_CODE,
+		);
+	}
+
+	return updateUserProfileByIdDal(userId, updateUserProfileInput)
+		.populate("role")
+		.exec();
 }

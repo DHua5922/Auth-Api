@@ -37,3 +37,19 @@ export function updateUserPasswordByIdDal(id: string, password: string) {
 		},
 	);
 }
+
+export function updateUserProfileByIdDal(
+	id: string,
+	profile: { username: string; email: string },
+) {
+	return User.findByIdAndUpdate(
+		id,
+		{
+			username: profile.username,
+			email: profile.email,
+		},
+		{
+			new: true,
+		},
+	);
+}
