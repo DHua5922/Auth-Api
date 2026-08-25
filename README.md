@@ -1,6 +1,19 @@
 # Auth API
 
-A TypeScript authentication API built with Express, MongoDB, Mongoose, Zod, and JSON Web Tokens. It supports user registration, login, access token validation, token refresh, and account closure, with generated OpenAPI documentation.
+A TypeScript authentication API built with Express, MongoDB, Mongoose, Zod, and JSON Web Tokens. It supports user registration, login, authenticated user lookup, access-token lookup by email, password reset, token refresh, and account closure, with generated OpenAPI documentation.
+
+## Table of contents
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Setup](#setup)
+- [API endpoints](#api-endpoints)
+- [API documentation](#api-documentation)
+- [Architecture](#architecture)
+- [Quality and automated testing](#quality-and-automated-testing)
+- [Deployment](#deployment)
+- [Security considerations](#security-considerations)
+- [License](#license)
 
 ## Features
 
@@ -50,16 +63,18 @@ The API defaults to `http://localhost:8080`.
 
 ## API endpoints
 
-| Method   | Endpoint                         | Authentication             | Description                                       |
-| -------- | -------------------------------- | -------------------------- | ------------------------------------------------- |
-| `POST`   | `/api/v1/auth/register`          | Public                     | Register a user                                   |
-| `POST`   | `/api/v1/auth/login`             | Public                     | Authenticate and return access and refresh tokens |
-| `POST`   | `/api/v1/auth/secure`            | Bearer access token        | Validate an access token and return its user      |
-| `POST`   | `/api/v1/auth/tokens/new`        | Refresh token in JSON body | Issue a new token pair                            |
-| `DELETE` | `/api/v1/auth/close-account/:id` | Bearer access token        | Delete a non-system-managed user                  |
-| `GET`    | `/openapi.json`                  | Public                     | Return the generated OpenAPI document             |
-| `GET`    | `/docs`                          | Public                     | Display Swagger UI                                |
-| `GET`    | `/`                              | Public                     | Health response                                   |
+| Method   | Endpoint                             | Authentication             | Description                                       |
+| -------- | ------------------------------------ | -------------------------- | ------------------------------------------------- |
+| `POST`   | `/api/v1/auth/register`              | Public                     | Register a user                                   |
+| `POST`   | `/api/v1/auth/login`                 | Public                     | Authenticate and return access and refresh tokens |
+| `POST`   | `/api/v1/auth/access-token-by-email` | Public                     | Return an access token for the provided email     |
+| `GET`    | `/api/v1/auth/me`                    | Bearer access token        | Return the authenticated user                     |
+| `POST`   | `/api/v1/auth/reset-password`        | Bearer access token        | Reset the authenticated user's password           |
+| `POST`   | `/api/v1/auth/tokens/new`            | Refresh token in JSON body | Issue a new token pair                            |
+| `DELETE` | `/api/v1/auth/close-account/:id`     | Bearer access token        | Delete a non-system-managed user                  |
+| `GET`    | `/openapi.json`                      | Public                     | Return the generated OpenAPI document             |
+| `GET`    | `/docs`                              | Public                     | Display Swagger UI                                |
+| `GET`    | `/`                                  | Public                     | Health response                                   |
 
 ## API documentation
 
@@ -77,7 +92,7 @@ route -> middleware -> controller -> service -> DAL -> model -> MongoDB
 ```
 
 - `routes/` defines endpoints and OpenAPI metadata.
-- `middleware/` handles authentication, request IDs, logging, and errors.
+- `middleware/` handles authentication, request IDs, logging, request validation, and errors.
 - `controllers/` translates HTTP requests into service calls.
 - `services/` contains authentication and user business logic.
 - `dal/` contains database queries.
@@ -85,7 +100,7 @@ route -> middleware -> controller -> service -> DAL -> model -> MongoDB
 - `schemas/` contains Zod validation and response schemas.
 - `utilities/` contains token, password, and documentation helpers.
 
-## Quality and tests
+## Quality and automated testing
 
 ```bash
 pnpm quality:check
@@ -93,7 +108,7 @@ pnpm test:unit
 pnpm test:integrations
 ```
 
-Test files use suffixes that determine which package script runs them, regardless of their directory:
+Automated test files use suffixes that determine which package script runs them, regardless of their directory:
 
 - Unit tests: `*.unit.test.ts`
 - Integration tests: `*.integrations.test.ts`
@@ -105,6 +120,22 @@ Integration tests cover successful HTTP scenarios across routing, middleware, co
 The application initializes its configured MongoDB connection during startup. For automated tests, use a separate test database and never point integration tests at production.
 
 When testing against a deployed Vercel instance, deployment protection can block requests before they reach the app. For local API validation, use the local server at `http://localhost:8080` or disable Vercel protection for the target environment.
+
+### CI automated test workflow
+
+For pull requests and main-branch protection, run the following automated checks in order:
+
+```bash
+pnpm quality:check
+pnpm test:unit
+pnpm test:integrations
+```
+
+Recommended policy:
+
+- Require all three commands to pass before merge.
+- Use a dedicated test database for integration jobs.
+- Store test environment secrets in CI secret storage and never commit them.
 
 ## Deployment
 
