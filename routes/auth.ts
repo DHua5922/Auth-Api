@@ -1,8 +1,6 @@
 import { z } from "zod";
 import {
-	closeAccountController,
 	getAccessTokenByEmailController,
-	getMeController,
 	loginController,
 	refreshTokensController,
 	registerNewUserController,
@@ -23,7 +21,6 @@ import {
 	registerUserServiceInputSchema,
 	resetPasswordServiceInputSchema,
 } from "../schemas/auth.ts";
-import { objectIdStringSchema } from "../schemas/mongodb.ts";
 import { userResponseSchema } from "../schemas/user.ts";
 import { createDocumentedRoute } from "../utilities/docs.ts";
 
@@ -148,42 +145,6 @@ route(
 		validateRequestBodyMiddleware(accessTokenByEmailRequestBodySchema),
 	),
 	errorLoggingMiddleware(getAccessTokenByEmailController),
-);
-
-route(
-	{
-		path: "/me",
-		method: "get",
-		tags,
-		summary: "Get current user",
-		description: "Return the authenticated user from the bearer access token.",
-		responses: userResponseConfig,
-	},
-	loggingMiddleware,
-	errorLoggingMiddleware(secureMiddleware),
-	errorLoggingMiddleware(getMeController),
-);
-
-route(
-	{
-		path: "/close-account/{id}",
-		method: "delete",
-		tags,
-		summary: "Close user account",
-		description:
-			"Deletes the user account and returns user information. The password is not included in the response.",
-		request: {
-			params: z.object({
-				id: objectIdStringSchema.meta({
-					description: "The ID of the user to delete",
-				}),
-			}),
-		},
-		responses: userResponseConfig,
-	},
-	loggingMiddleware,
-	errorLoggingMiddleware(secureMiddleware),
-	errorLoggingMiddleware(closeAccountController),
 );
 
 route(

@@ -46,7 +46,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
 	const response = await request(app)
-		.delete(`/api/v1/auth/close-account/${userId}`)
+		.delete(`/api/v1/users/${userId}`)
 		.set("Authorization", `Bearer ${accessToken}`);
 
 	expect(response.status).toBe(SUCCESS_STATUS_CODE);
@@ -72,9 +72,9 @@ test("POST /login should return a user and token pair", async () => {
 	refreshToken = response.body.refreshToken;
 });
 
-test("GET /me should return the authenticated user", async () => {
+test("GET /api/v1/users/me should return the authenticated user", async () => {
 	const response = await request(app)
-		.get("/api/v1/auth/me")
+		.get("/api/v1/users/me")
 		.set("Authorization", `Bearer ${accessToken}`);
 
 	expect(response.status).toBe(SUCCESS_STATUS_CODE);
