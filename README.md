@@ -1,3 +1,5 @@
+[![Continuous Integration](https://github.com/DHua5922/Auth-Api/actions/workflows/ci.yml/badge.svg)](https://github.com/DHua5922/Auth-Api/actions/workflows/ci.yml)
+
 # Auth API
 
 A TypeScript authentication API built with Express, MongoDB, Mongoose, Zod, and JSON Web Tokens. It supports user registration, login, authenticated user lookup, access-token lookup by email, password reset, token refresh, profile updates, account closure, and event publishing to Inngest, with generated OpenAPI documentation.
