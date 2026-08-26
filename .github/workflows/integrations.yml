@@ -43,11 +43,4 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Run Integration Tests
-        env:
-          MONGO_URI: ${{ secrets.MONGO_TEST_URI }}
-          JWT_SECRET: ${{ secrets.JWT_TEST_SECRET }}
-          ACCESS_TOKEN_NAME: accessToken
-          ACCESS_TOKEN_EXPIRATION: 15m
-          REFRESH_TOKEN_NAME: refreshToken
-          REFRESH_TOKEN_EXPIRATION: 7d
         run: pnpm run test:integrations
